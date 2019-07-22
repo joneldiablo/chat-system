@@ -16,6 +16,9 @@ There is two *.env* files, at the root and frontend folder this files are includ
 
 Navigate to `http://localhost:4000` to see the resultant system
 
+Any question, please ledme know
+
+Thanks
 
 ## TODO
 
