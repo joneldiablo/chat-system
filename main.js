@@ -10,10 +10,13 @@ const main = () => {
   app.use(express.json({ limit: '5mb' }));
   app.use(express.urlencoded({ extended: true }));
   let buildPath = path.join(__dirname, 'frontend/build');
-  app.use('/', express.static(buildPath));
+  app.use(express.static(buildPath));
+  app.get(['/', '/chat', '/chat/:id'], (req, res) =>
+    res.sendFile(path.resolve(buildPath, 'index.html')));
   let api = new ApiAccess();
   app.use('/api', api.app);
-  app.listen(PORT, () => console.log(`Listening on port ${PORT}!`));
+  let server = app.listen(PORT, () => console.log(`Listening on port ${PORT}!`));
+  api.chatInit(server);
 }
 
 main();

@@ -8,7 +8,7 @@
     "init": "npm i && npm i --prefix frontend && npm run build && npm run doc",
     "start": "node main.js",
     "build": "babel -d lib src --source-maps & npm run build --prefix frontend",
-    "test": "nodemon --ignore output,scripts,frontend --exec babel-node test",
+    "test": "nodemon --ignore frontend --exec babel-node test",
     "test-frontend": "npm start --prefix frontend",
     "models": "nodemon --ignore src/api/models --exec babel-node ./scripts/generate-model.js",
     "doc": "jsdoc ./src -d documentation -c .jsdoc -r"

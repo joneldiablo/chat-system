@@ -14,7 +14,6 @@ export default class MessageController extends Controller {
    * 
    */
   async get(data) {
-    console.log(data);
     let senderId = data.auth.id;
     let receiverId = data.receiverId;
     let messages = await MessageModel.query()
@@ -23,6 +22,17 @@ export default class MessageController extends Controller {
       .limit(50)
       .orderBy('date', 'desc');
     return messages.reverse();
+  }
+
+  /**
+   * 
+   * @param {*} data 
+   */
+  async set(data) {
+    data.receiverId = parseInt(data.receiverId);
+    data.senderId = parseInt(data.senderId);
+    let r = await super.set({ body: data }, {}, {}, null, true);
+    return r;
   }
 
 }

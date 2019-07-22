@@ -15,8 +15,9 @@ export default class ApiAccess {
     this._app = express();
     let app = this._app;
     app.get('/', this.serviceVersion.bind(this));
-    app.use('/private', this.auth.bind(this), this.routesMapper(routes.private));
+    app.use('/private', this.authMiddleware.bind(this), this.routesMapper(routes.private));
     app.use(this.routesMapper(routes.public));
+    this.usersConnected = [];
   }
 
   /**
@@ -36,17 +37,29 @@ export default class ApiAccess {
    * @param {*} res 
    * @param {*} next 
    */
-  auth(req, res, next) {
+  authMiddleware(req, res, next) {
     let { token } = req.headers;
-    try {
-      var user = jwt.verify(token, masterKey);
-    } catch (error) {
+    let usr = this.auth(token);
+    if (!usr) {
       let e = this.errors({ code: 401 });
       res.status(e.status).json(e);
       return false;
     }
-    req.auth = user;
+    req.auth = usr;
     next();
+  }
+
+  /**
+   * 
+   * @param {*} routes 
+   */
+  auth(token) {
+    try {
+      var user = jwt.verify(token, masterKey);
+    } catch (error) {
+      return false;
+    }
+    return user;
   }
 
   /**
@@ -144,8 +157,35 @@ export default class ApiAccess {
   chatInit(server) {
     let io = socketIo(server);
     io.on('connection', (socket) => {
-      socket.on('auth', (payload) => {
-        console.log(payload);
+      //console.log(socket.id);
+      let { token } = socket.handshake.query;
+      let user = this.auth(token);
+      if (!user) {
+        socket.emit('rejected');
+        return false;
+      }
+      let usrExist = this.usersConnected.filter(u => u.id == user.id);
+      if (usrExist.length) {
+        usrExist[0].sockets.push(socket);
+      } else {
+        user.sockets = [socket];
+        this.usersConnected.push(user);
+      }
+      socket.emit('auth', { done: true });
+      let messageC = new controllers.MessageController();
+      socket.on('newMessage', async (m) => {
+        let row = await messageC.set(m);
+        let receiver = this.usersConnected.filter(u => u.id == m.receiverId);
+        if (receiver.length) {
+          receiver[0].sockets.forEach(s => {
+            s.emit('newMessageReceived', row);
+          });
+        }
+        let sender = this.usersConnected.filter(u => u.id == m.senderId);
+        sender[0].sockets.forEach(s => {
+          if (s.id != socket.id)
+            s.emit('newMessageReceived', row);
+        });
       });
     });
   }
