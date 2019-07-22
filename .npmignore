@@ -1,0 +1,8 @@
+src
+test
+main.js
+scripts
+.jsdoc
+.babelrc
+node_modules
+.vscode
