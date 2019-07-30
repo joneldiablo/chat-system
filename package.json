@@ -1,13 +1,13 @@
 {
-  "name": "api-access",
-  "version": "1.0.0",
+  "name": "chat-system",
+  "version": "1.0.1",
   "description": "",
   "main": "lib/ApiAccess.js",
   "author": "joneldiablo",
   "scripts": {
     "init": "npm i && npm i --prefix frontend && npm run build && npm run doc",
     "start": "node main.js",
-    "build": "babel -d lib src --source-maps & npm run build --prefix frontend",
+    "build": "babel -d lib src --source-maps",
     "test": "nodemon --ignore frontend --exec babel-node test",
     "test-frontend": "npm start --prefix frontend",
     "models": "nodemon --ignore src/api/models --exec babel-node ./scripts/generate-model.js",
